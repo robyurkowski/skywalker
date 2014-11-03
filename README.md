@@ -5,7 +5,7 @@ Skywalker is a gem that provides a simple command pattern for applications that 
 ## Why Skywalker?
 
 It's impossible to come up with a single-word clever name for a gem about commands. If you can't
-achieve clever, achieve topicality.
+achieve cleverness, achieve topicality.
 
 ## What is a command?
 
@@ -77,8 +77,9 @@ command = AddGroupCommand.call(
   on_failure: method(:on_failure)
 )
 
-You can pass any object responding to `#call` to the `on_success` and `on_failure` handlers, including procs, lambdas, controller methods, or other commands themselves.
 ```
+
+You can pass any object responding to `#call` to the `on_success` and `on_failure` handlers, including procs, lambdas, controller methods, or other commands themselves.
 
 ## Contributing
 
