@@ -13,9 +13,14 @@ module Skywalker
     ################################################################################
     # Instantiates command, setting all arguments.
     ################################################################################
-    def initialize(on_success: nil, on_failure: nil)
-      self.on_success = on_success
-      self.on_failure = on_failure
+    def initialize(**args)
+      args.each_pair do |k, v|
+        singleton_class.class_eval do
+          send(:attr_accessor, k) unless self.respond_to? k
+        end
+
+        self.send("#{k}=", v)
+      end
     end
 
 
@@ -57,7 +62,12 @@ module Skywalker
     # Trigger the given callback on success
     ################################################################################
     private def confirm_success
-      on_success.call(self)
+      run_success_callbacks
+    end
+
+
+    private def run_success_callbacks
+      on_success.call(self) if self.respond_to?(:on_success)
     end
 
 
@@ -66,7 +76,12 @@ module Skywalker
     ################################################################################
     private def confirm_failure(error)
       self.error = error
-      on_failure.call(self)
+      run_failure_callbacks
+    end
+
+
+    private def run_failure_callbacks
+      on_failure.call(self) if self.respond_to?(:on_failure)
     end
   end
 end

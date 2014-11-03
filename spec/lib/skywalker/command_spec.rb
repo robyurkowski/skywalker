@@ -5,21 +5,20 @@ module Skywalker
   RSpec.describe Command do
     describe "convenience" do
       it "provides a class call method that instantiates and calls" do
-        arg = 'blah'
-
         expect(Command).to receive_message_chain('new.call')
-        Command.call(arg)
+        Command.call
       end
     end
 
 
     describe "instantiation" do
-      it "accepts an on_success callback" do
-        expect { Command.new(on_success: ->{ nil }) }.not_to raise_error
+      it "accepts a variable list of arguments" do
+        expect { Command.new(a_symbol: :my_symbol, a_string: "my string") }.not_to raise_error
       end
 
-      it "accepts an on_failure callback" do
-        expect { Command.new(on_failure: ->{ nil }) }.not_to raise_error
+      it "sets an instance variable for each argument" do
+        command = Command.new(a_symbol: :my_symbol)
+        expect(command.a_symbol).to eq(:my_symbol)
       end
     end
 
@@ -53,9 +52,26 @@ module Skywalker
           command.call
         end
 
-        it "calls the on_success callback with itself" do
-          expect(on_success).to receive(:call).with(command)
+        it "runs the success callbacks" do
+          expect(command).to receive(:run_success_callbacks)
           command.call
+        end
+
+        describe "on_success" do
+          context "when on_success is defined" do
+            it "calls the on_success callback with itself" do
+              expect(on_success).to receive(:call).with(command)
+              command.call
+            end
+          end
+
+          context "when on_success is not defined" do
+            let(:command) { Command.new }
+
+            it "does not call on_success" do
+              expect(command).not_to receive(:on_success)
+            end
+          end
         end
       end
 
@@ -79,10 +95,31 @@ module Skywalker
           command.call
         end
 
-        it "calls the on_failure callback with itself" do
+        it "runs the failure callbacks" do
           allow(command).to receive(:error=)
-          expect(on_failure).to receive(:call).with(command)
+          expect(command).to receive(:run_failure_callbacks)
           command.call
+        end
+
+        describe "on_failure" do
+          before do
+            allow(command).to receive(:error=)
+          end
+
+          context "when on_failure is defined" do
+            it "calls the on_failure callback with itself" do
+              expect(on_failure).to receive(:call).with(command)
+              command.call
+            end
+          end
+
+          context "when on_failure is not defined" do
+            let(:command) { Command.new }
+
+            it "does not call on_failure" do
+              expect(command).not_to receive(:on_failure)
+            end
+          end
         end
       end
     end
