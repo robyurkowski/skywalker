@@ -16,7 +16,17 @@ module Skywalker
         expect { Command.new(a_symbol: :my_symbol, a_string: "my string") }.not_to raise_error
       end
 
-      it "sets an instance variable for each argument" do
+      it "sets a reader for each argument" do
+        command = Command.new(a_symbol: :my_symbol)
+        expect(command).to respond_to(:a_symbol)
+      end
+
+      it "sets a writer for each argument" do
+        command = Command.new(a_symbol: :my_symbol)
+        expect(command).to respond_to(:a_symbol=)
+      end
+
+      it "sets the instance variable to the passed value" do
         command = Command.new(a_symbol: :my_symbol)
         expect(command.a_symbol).to eq(:my_symbol)
       end

@@ -14,12 +14,15 @@ module Skywalker
     # Instantiates command, setting all arguments.
     ################################################################################
     def initialize(**args)
-      args.each_pair do |k, v|
+      args.each_pair do |reader_method, value|
+        writer_method = "#{reader_method}="
+
         singleton_class.class_eval do
-          send(:attr_accessor, k) unless self.respond_to? k
+          send(:attr_reader, reader_method) unless respond_to?(reader_method)
+          send(:attr_writer, reader_method) unless respond_to?(writer_method)
         end
 
-        self.send("#{k}=", v)
+        self.send(writer_method, value)
       end
     end
 
