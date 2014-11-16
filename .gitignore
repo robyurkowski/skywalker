@@ -13,5 +13,7 @@
 *.a
 mkmf.log
 
+examples/vendor/gems
+
 vendor/bundle
 vendor/gems

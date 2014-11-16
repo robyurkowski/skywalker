@@ -190,18 +190,23 @@ class CreateGroupCommand < Skywalker::Command
   end
 
 
+  private def required_args
+    %w(group on_success on_failure)
+  end
+
+
   private def save_group!
     group.save!
   end
 
 
   private def send_notifications!
-    notifier.call(group).deliver
+    notifier.deliver
   end
 
 
   private def notifier
-    @notifier ||= NotificationsMailer.method(:group_created_notification)
+    @notifier ||= NotificationsMailer.group_created_notification(group)
   end
 end
 ```
@@ -242,6 +247,10 @@ The following methods are overridable for easy customization:
 
 - `execute!`
   - Define your operations here.
+- `required_args`
+  - An array of expected keys given to the command. Raises `ArgumentError` if keys are missing.
+- `validate_arguments!`
+  - Checks required args are present, but can be customized. All instance variables are set by this point.
 - `transaction(&block)`
   - Uses an `ActiveRecord::Base.transaction` by default, but can be customized. `execute!` runs inside of this.
 - `confirm_success`
@@ -255,9 +264,50 @@ The following methods are overridable for easy customization:
 
 For further reference, simply see the command file. It's less than 90 LOC and well-commented.
 
-## Testing
+## Testing (and TDD)
 
-To come.
+Take a look at the `examples` directory, which uses example as above of a notifier, but makes it a bit more complicated: it assumes that we only send emails if the user (which we'll pass in) has a preference set to receive email.
+
+### Assumptions
+
+Here's what you can assume in your tests:
+
+1. Arguments that are present in the list of required_args will throw an error before the command executes if they are not passed.
+2. Operations that throw an error will abort the command and trigger its failure state.
+3. Calling `Command.new().call` is functionally equivalent to calling `Command.call()`
+
+### Strategy
+
+There are two tests that you need to write. First, you'll want to write a Command spec, which are very simplistic specs and should be used to verify the validity of the command in isolation from the rest of the system. (This is what the example shows.) You'll also want to write some high-level integration tests to make sure that the command is implemented correctly inside your controller, and has the expected system-wide results. You shouldn't need to write integration specs to test every path -- it should suffice to test a successful path and a failing path, though your situation may vary depending on the detail of error handling you perform.
+
+Here's one huge benefit: with a few small steps, you won't need to include `rails_helper` to boot up the entire environment. That means blazingly fast tests. All you need to do is stub `transaction` on your command, like so:
+
+```ruby
+RSpec.describe CreateGroupCommand do
+  describe "operations" do
+    let(:command) { CreateGroupCommand.new(group: double("group") }
+
+    before do
+      allow(command).to receive(:transaction).and_yield
+    end
+
+    # ...
+  end
+end
+```
+
+### Common Failures
+
+Your failures will initially look like this:
+
+```
+undefined method `call' for nil:NilClass
+  # .../lib/skywalker/command.rb:118:in `run_failure_callbacks'
+```
+
+This means that the command failed and you didn't specify an `on_failure` callback. You can stick a debugger
+inside of `run_failure_callbacks`, and get the failure exception as `self.error`. You can also reraise the exceptiong to achieve a better result summary, but this is not done by default, as you may also want to test error handling.
+
 
 ## Contributing
 

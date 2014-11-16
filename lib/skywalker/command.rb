@@ -14,6 +14,42 @@ module Skywalker
     # Instantiates command, setting all arguments.
     ################################################################################
     def initialize(**args)
+      self.args = args
+      self.args.freeze
+
+      parse_arguments
+      validate_arguments!
+
+    end
+
+
+    attr_accessor :on_success,
+                  :on_failure,
+                  :error,
+                  :args
+
+
+    ################################################################################
+    # Ensure required keys are present.
+    ################################################################################
+    private def validate_arguments!
+      missing_args = required_args.map(&:to_s) - args.keys.map(&:to_s)
+
+      raise ArgumentError, "#{missing_args.join(", ")} required but not given" \
+        if missing_args.any?
+    end
+
+
+    ################################################################################
+    # Any required keys should go here as either strings or symbols.
+    ################################################################################
+    private def required_args
+      []
+    end
+
+
+
+    private def parse_arguments
       args.each_pair do |reader_method, value|
         writer_method = "#{reader_method}="
 
@@ -25,11 +61,6 @@ module Skywalker
         self.send(writer_method, value)
       end
     end
-
-
-    attr_accessor :on_success,
-                  :on_failure,
-                  :error
 
 
     ################################################################################
