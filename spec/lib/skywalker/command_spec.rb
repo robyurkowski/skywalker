@@ -83,18 +83,30 @@ module Skywalker
         end
 
         describe "on_success" do
-          context "when on_success is defined" do
+          context "when on_success is not nil" do
             it "calls the on_success callback with itself" do
               expect(on_success).to receive(:call).with(command)
               command.call
             end
+
+            context "when on_success is not callable" do
+              let(:on_failure) { double("on_failure") }
+              let(:command) { Command.new(on_success: "a string", on_failure: on_failure) }
+
+              it "confirms failure if the on_success callback fails" do
+                expect(on_failure).to receive(:call).with(command)
+                command.call
+              end
+            end
           end
 
-          context "when on_success is not defined" do
-            let(:command) { Command.new }
+          context "when on_success is nil" do
+            let(:nil_callback) { double("fakenil", nil?: true) }
+            let(:command) { Command.new(on_success: nil_callback) }
 
             it "does not call on_success" do
-              expect(command).not_to receive(:on_success)
+              expect(nil_callback).not_to receive(:call)
+              command.call
             end
           end
         end
@@ -131,18 +143,28 @@ module Skywalker
             allow(command).to receive(:error=)
           end
 
-          context "when on_failure is defined" do
+          context "when on_failure is not nil" do
             it "calls the on_failure callback with itself" do
               expect(on_failure).to receive(:call).with(command)
               command.call
             end
+
+            context "when on_failure is not callable" do
+              let(:command) { Command.new(on_failure: "a string") }
+
+              it "raises an error" do
+                expect { command.call }.to raise_error
+              end
+            end
           end
 
-          context "when on_failure is not defined" do
-            let(:command) { Command.new }
+          context "when on_failure is nil" do
+            let(:nil_callback) { double("fakenil", nil?: true) }
+            let(:command) { Command.new(on_failure: nil_callback) }
 
             it "does not call on_failure" do
-              expect(command).not_to receive(:on_failure)
+              expect(nil_callback).not_to receive(:call)
+              command.call
             end
           end
         end

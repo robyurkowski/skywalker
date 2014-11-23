@@ -101,7 +101,7 @@ module Skywalker
 
 
     private def run_success_callbacks
-      on_success.call(self) if self.respond_to?(:on_success)
+      on_success.call(self) unless on_success.nil?
     end
 
 
@@ -115,7 +115,7 @@ module Skywalker
 
 
     private def run_failure_callbacks
-      on_failure.call(self) if self.respond_to?(:on_failure)
+      on_failure.call(self) unless on_failure.nil?
     end
   end
 end

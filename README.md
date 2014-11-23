@@ -241,6 +241,12 @@ command = AddGroupCommand.call(
 
 You can pass any object responding to `#call` to the `on_success` and `on_failure` handlers, including procs, lambdas, controller methods, or other commands themselves.
 
+### What happens when callbacks fail?
+
+Exceptions thrown inside the success callbacks (`on_success` or your own callbacks defined in `run_success_callbacks`) will cause the command to fail and run the failure callbacks.
+
+Exceptions thrown inside the failure callbacks (`on_failure` or your own callbacks defined in `run_failure_callbacks`) will not be caught and will bubble out of the command.
+
 ### Overriding Methods
 
 The following methods are overridable for easy customization:
