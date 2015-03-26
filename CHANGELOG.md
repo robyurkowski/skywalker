@@ -1,5 +1,9 @@
 All commits by Rob Yurkowski unless otherwise noted.
 
+## 1.2.2 (2015-03-26)
+
+- Loosen restrictions on ActiveRecord version.
+
 ## 1.2.1 (2014-11-23)
 
 - Fix a bug where callbacks would be called even if they were nil.

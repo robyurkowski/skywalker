@@ -1,8 +1,8 @@
 PATH
   remote: ../
   specs:
-    skywalker (1.2.1)
-      activerecord (~> 4.1)
+    skywalker (1.2.2)
+      activerecord (>= 4.0)
 
 GEM
   remote: https://rubygems.org/
