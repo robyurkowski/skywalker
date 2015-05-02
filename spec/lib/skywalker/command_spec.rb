@@ -11,43 +11,6 @@ module Skywalker
     end
 
 
-    describe "instantiation" do
-      it "freezes the arguments given to it" do
-        command = Command.new(a_symbol: :my_symbol)
-        expect(command.args).to be_frozen
-      end
-
-      it "accepts a variable list of arguments" do
-        expect { Command.new(a_symbol: :my_symbol, a_string: "my string") }.not_to raise_error
-      end
-
-      it "sets a reader for each argument" do
-        command = Command.new(a_symbol: :my_symbol)
-        expect(command).to respond_to(:a_symbol)
-      end
-
-      it "sets a writer for each argument" do
-        command = Command.new(a_symbol: :my_symbol)
-        expect(command).to respond_to(:a_symbol=)
-      end
-
-      it "sets the instance variable to the passed value" do
-        command = Command.new(a_symbol: :my_symbol)
-        expect(command.a_symbol).to eq(:my_symbol)
-      end
-
-      it "raises an error if an argument in its required_args is not present" do
-        allow_any_instance_of(Command).to receive(:required_args).and_return([:required_arg])
-        expect { Command.new }.to raise_error
-      end
-
-      it "does not raise an error if an argument in its required_args is present" do
-        allow_any_instance_of(Command).to receive(:required_args).and_return([:required_arg])
-        expect { Command.new(required_arg: :blah) }.not_to raise_error
-      end
-    end
-
-
     describe "validity control" do
       let(:command) { Command.new }
 

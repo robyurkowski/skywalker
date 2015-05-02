@@ -1,5 +1,10 @@
 All commits by Rob Yurkowski unless otherwise noted.
 
+## 2.0.0 (2015-05-02)
+
+- Refactors guts of commands to extract kwarg instantiation pattern into `Acceptable` module.
+- Improves inline documentation.
+
 ## 1.2.2 (2015-03-26)
 
 - Loosen restrictions on ActiveRecord version.

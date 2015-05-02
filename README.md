@@ -314,7 +314,6 @@ undefined method `call' for nil:NilClass
 This means that the command failed and you didn't specify an `on_failure` callback. You can stick a debugger
 inside of `run_failure_callbacks`, and get the failure exception as `self.error`. You can also reraise the exceptiong to achieve a better result summary, but this is not done by default, as you may also want to test error handling.
 
-
 ## Contributing
 
 1. Fork it ( https://github.com/robyurkowski/skywalker/fork )
