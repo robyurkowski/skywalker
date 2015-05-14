@@ -12,7 +12,8 @@ module Skywalker
 
 
     #
-    # Instantiates an object, setting all kwargs as accessors.
+    # Instantiates an object, setting all kwargs as accessors, and yields self
+    # to any block given.
     #
     # @since 2.0.0
     #
@@ -22,6 +23,8 @@ module Skywalker
 
       validate_arguments!
       parse_arguments
+
+      yield self if block_given?
     end
 
 

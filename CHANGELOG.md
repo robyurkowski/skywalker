@@ -1,5 +1,29 @@
 All commits by Rob Yurkowski unless otherwise noted.
 
+## 2.1.0 (2015-05-14)
+
+- Yields self to any block given to any object implementing `Skywalker::Acceptable`.
+
+  This has a few ramifications; first, it allows some easy extension simply by
+  passing a block to the constructor, as such:
+
+  ```ruby
+  a = MyObject.new(an_argument: :foo) { |instance| instance.an_argument = :bar }
+  a.an_argument # => :bar
+  ```
+
+  More importantly, it allows for simpler subclassing:
+
+  ```ruby
+  class MyCommand < Skywalker::Command
+    def initialize(*args)
+      super do
+        a_symbol = :new_symbol
+      end
+    end
+  end
+  ```
+
 ## 2.0.0 (2015-05-02)
 
 - Refactors guts of commands to extract kwarg instantiation pattern into `Acceptable` module.

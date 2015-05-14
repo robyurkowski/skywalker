@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    skywalker (2.0.0)
+    skywalker (2.1.0)
       activerecord (>= 4.0)
 
 GEM

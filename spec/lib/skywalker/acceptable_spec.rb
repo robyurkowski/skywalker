@@ -39,6 +39,11 @@ module Skywalker
         allow_any_instance_of(klass).to receive(:required_args).and_return([:required_arg])
         expect { klass.new(required_arg: :blah) }.not_to raise_error
       end
+
+      it "yields self if given a block" do
+        instance = klass.new(a_symbol: :my_symbol) { |_self| _self.a_symbol = :new_symbol }
+        expect(instance.a_symbol).to eq :new_symbol
+      end
     end
   end
 end
