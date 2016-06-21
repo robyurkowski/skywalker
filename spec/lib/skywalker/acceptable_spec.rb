@@ -32,7 +32,7 @@ module Skywalker
 
       it "raises an error if an argument in its required_args is not present" do
         allow_any_instance_of(klass).to receive(:required_args).and_return([:required_arg])
-        expect { klass.new }.to raise_error
+        expect { klass.new }.to raise_error ArgumentError
       end
 
       it "does not raise an error if an argument in its required_args is present" do

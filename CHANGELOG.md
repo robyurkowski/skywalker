@@ -1,5 +1,21 @@
 All commits by Rob Yurkowski unless otherwise noted.
 
+## 2.2.0 (2016-06-21)
+
+- Extracts command behaviour to `Skywalker::Callable` and
+  `Skywalker::Transactional`.
+
+  This simplifies the `Command` object, making it basically a combination of
+  `Callable` and `Transactional` mixins. It also allows for the reuse of the
+  constituent parts on a larger scale.
+
+- Remove dependency on `ActiveRecord`.
+
+  We now do a check to see if ActiveRecord is defined. If not, we simply default
+  to calling the passed block. This allows us to avoid having to require
+  ActiveRecord, which lightens our dependencies and also makes us feel just a
+  tiny bit less dirty.
+
 ## 2.1.0 (2015-05-14)
 
 - Yields self to any block given to any object implementing `Skywalker::Acceptable`.
