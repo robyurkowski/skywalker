@@ -120,7 +120,11 @@ module Skywalker
     # @since 2.2.0
     #
     private def run_failure_callbacks
-      on_failure.call(self) unless on_failure.nil?
+      if on_failure
+        on_failure.call(self)
+      else
+        raise error
+      end
     end
 
   end

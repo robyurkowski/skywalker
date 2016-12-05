@@ -126,10 +126,6 @@ module Skywalker
         end
 
         describe "on_failure" do
-          before do
-            allow(instance).to receive(:error=)
-          end
-
           context "when on_failure is not nil" do
             it "calls the on_failure callback with itself" do
               expect(on_failure).to receive(:call).with(instance)
@@ -146,12 +142,10 @@ module Skywalker
           end
 
           context "when on_failure is nil" do
-            let(:nil_callback) { double("fakenil", nil?: true) }
-            let(:instance) { klass.new(on_failure: nil_callback) }
+            let(:instance) { klass.new }
 
-            it "does not call on_failure" do
-              expect(nil_callback).not_to receive(:call)
-              instance.call
+            it "raises the error" do
+              expect { instance.call }.to raise_error ScriptError
             end
           end
         end

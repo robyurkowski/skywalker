@@ -349,7 +349,7 @@ end
 
 ### Common Failures
 
-Your failures will initially look like this:
+Before version 3.0, you might have received an error like this:
 
 ```
 undefined method `call' for nil:NilClass
@@ -359,8 +359,13 @@ undefined method `call' for nil:NilClass
 This means that the command failed and you didn't specify an `on_failure`
 callback. You can stick a debugger inside of `run_failure_callbacks`, and get
 the failure exception as `self.error`. You can also reraise the exception to
-achieve a better result summary, but this is not done by default, as you may
-also want to test error handling.
+achieve a better result summary, but this was not done by default.
+
+**Now**, in version 3.0 and later, any command that does not receive a callable
+`on_failure` argument will raise any arguments it encounters during the process
+of running `execute!`.
+
+
 
 ## Components
 
