@@ -4,13 +4,16 @@ Skywalker is a gem that provides a simple command pattern for applications that
 use transactions. (Or not! In later versions, Skywalker is much more modular and
 can be [used for non-transactional purposes](#components), too.)
 
+use transactions.
+
 ## Why Skywalker?
 
-Because "Commander Skywalker".
+It's a reference to 'Commander Skywalker' from Star Wars, a rank the
+main protagonist achieves and by which he is called.
 
-It's impossible to come up with a single-word name for a gem about commands
-that's at least marginally witty. If you can't achieve wit or cleverness, at
-least achieve topicality, right?
+It's tricky to come up with a memorable single-word name for a gem about
+commands that's at least marginally witty. If you can't achieve wit or
+cleverness, at least achieve topicality, right?
 
 ## What is a command?
 
@@ -19,6 +22,28 @@ and considered a single unit. If one instruction fails, they should all fail.
 
 That's a transaction, you say? You're correct! But there are some benefits of
 considering transactional blocks as objects:
+
+### Operations as Objects (And Interfaces as Collaborators)
+
+One of the really cool things about Ruby is that it's trivial to pass a class
+as an argument. This makes Dependency Injection (DI) dead simple. (If you've
+never heard of DI, you should read my favourite architecture grump 
+[Piotr Solnic's take on it](http://solnic.eu/2013/12/17/the-world-needs-another-post-about-dependency-injection-in-ruby.html).)
+
+This, of course, makes a lot of sense when you'd like to remove a reference to
+a model class to test in isolation. But it also makes a lot of sense when you realize that portions
+of your code are collaborators, too: anything that's orthogonal (or a side
+effect) to what you're working on is something that you can test in isolation.
+And if you've ever done this, you know that isolated tests are so much easier to
+write, so much easier to maintain, and so much faster to run.
+
+This isn't limited to a Command object. You can offload these chunks of code
+into numerous other collaborators, some of which people call 'Service',
+'Operation', or 'Policy' objects. But it is an essential property of these
+types of objects and a huge benefit.
+
+Skywalker also has an `Acceptable` module that can be used to create other such
+objects that do not necessarily require a transaction.
 
 ### Testability
 
@@ -41,9 +66,8 @@ and a single bad path through integration specs, and that will suffice.
 
 The benefit of abstraction means that you can easily reason about a command
 without having to know its internals. Standard caveats apply, but if you have a
-`CreateGroup` command, you should be able to infer that calling the command with
-the correct arguments will produce the expected result, rather than having to
-remember all the side effects of an operation.
+`CreateGroup` command, you should be able to infer that calling the command
+with the correct arguments will produce the expected result.
 
 ### Knowledge of Results Without Knowledge of Response
 
@@ -60,9 +84,9 @@ callback if `request.xhr?`? Simply override `run_success_callbacks` and
 
 ### A Gateway to Harder Architectures
 
-It's not hard to create an `Event` class and step up toward full event sourcing,
-or to go a bit further and implement full CQRS. This is the architectural
-pattern your parents warned you about.
+It's not hard to create an `Event` class and step up toward full event
+sourcing, or to go a bit further and implement full CQRS. This is the
+architectural pattern your parents warned you about.
 
 ## Installation
 
@@ -122,10 +146,10 @@ This might seem concise because it keeps the controller small. (Fat model, thin
 controller has been a plank of Rails development for a while, but it's slowly
 going away, thank heavens). But there are two problems here: first, it
 introduces a point of coupling between the model and the mailer, which not only
-makes testing slower, it means that these two objects are now entwined. Create a
-group through the Rails console? You're sending an email with no way to skip
+makes testing slower, it means that these two objects are now entwined. Create
+a group through the Rails console? You're sending an email with no way to skip
 that. Secondly, it reduces the reasonability of the code. When you look at the
-`GroupsController`, you can't suss out the fact that this sends an email.
+`GroupsController`, you can't immediately see that this sends an email.
 
 **Moral #1: Orthogonal concerns should not be put into ActiveRecord callbacks.**
 
@@ -156,12 +180,12 @@ and longer. Maybe you're sending a tweet about the group, scheduling a
 background job to update some thumbnails, or hitting a webhook URL. You're
 losing the reasonability of the code because of the detail.
 
-Moreover, imagine that the group email being sent contains critical instructions
-on how to proceed. What if `NotificationMailer` has a syntax error? The group is
-created, but the mail won't be sent. Now the user hasn't gotten a good error,
-and your database is potentially fouled up by half-performed requests. You can
-run this in a transaction, but that does not reduce the complexity contained
-within the controller. 
+Moreover, imagine that the group email being sent contains critical
+instructions on how to proceed. What if `NotificationMailer` has a syntax
+error? The group is created, but the mail won't be sent. Now the user hasn't
+received a good error, and your database is potentially fouled up by
+half-performed requests. You can run this in a transaction, but that does not
+reduce the complexity contained within the controller.
 
 **Moral #2: Rails controllers should dispatch to application logic, and receive
 instructions on how to respond.**
@@ -226,9 +250,20 @@ class CreateGroupCommand < Skywalker::Command
 end
 ```
 
-You can of course set up a default for Group as with `#notifier` and pass in
-params only, but I find injecting a pre-constructed ActiveRecord object usually
-works well.
+Two notes on the above example:
+
+First, you do not have to use `method`. You are free to do what you
+wish&mdash;whether that is using a proc, or injecting the controller context as
+an argument and then overwriting the callback methods to use that. But I (and
+this library) take a principled stance that what occurs inside those callbacks
+is usually the responsibility of the controller and should remain within it, so
+this is made easy, and you are strongly encouraged to follow this pattern.
+
+Secondly, it is ideologically 'purer' to pass in a method which would construct
+a group, and the params separately, because it moves the instantiation of
+domain concepts out of the controller. However, for the purpose of 'GSD', I
+often wind up keeping the instantiation of simple AR objects inside of my
+controller.
 
 
 ### Basic Composition Summary
@@ -261,12 +296,12 @@ commands themselves.
 ### What happens when callbacks fail?
 
 Exceptions thrown inside the success callbacks (`on_success` or your own
-callbacks defined in `run_success_callbacks`) will cause the command to fail and
-run the failure callbacks.
+callbacks defined in `run_success_callbacks`) will cause the command to fail
+and run the failure callbacks.
 
 Exceptions thrown inside the failure callbacks (`on_failure` or your own
-callbacks defined in `run_failure_callbacks`) will not be caught and will bubble
-out of the command.
+callbacks defined in `run_failure_callbacks`) will not be caught and will
+bubble out of the command.
 
 ### Overriding Methods
 
@@ -300,7 +335,7 @@ well-commented.
 
 ## Testing (and TDD)
 
-Take a look at the `examples` directory, which uses example as above of a
+Take a look at the `examples` directory, which uses the example as above of a
 notifier, but makes it a bit more complicated: it assumes that we only send
 emails if the user (which we'll pass in) has a preference set to receive email.
 
@@ -308,10 +343,10 @@ emails if the user (which we'll pass in) has a preference set to receive email.
 
 Here's what you can assume in your tests:
 
-1. Arguments that are present in the list of required_args will throw an error
+1. Arguments that are present in the list of `required_args` will throw an error
    before the command executes if they are not passed.
-2. Operations that throw an error will abort the command and trigger its failure
-   state.
+2. Operations that throw an error will abort the command and trigger its
+   failure state.
 3. Calling `Command.new().call` is functionally equivalent to calling
    `Command.call()`
 
@@ -320,14 +355,12 @@ Here's what you can assume in your tests:
 There are two tests that you need to write. First, you'll want to write a
 Command spec, which are very simplistic specs and should be used to verify the
 validity of the command in isolation from the rest of the system. (This is what
-the example shows.)
-
-You'll also want to write some high-level integration tests to make sure that
-the command is implemented correctly inside your controller, and has the
-expected system-wide results. You shouldn't need to write integration specs to
-test every path -- it should suffice to test a successful path and a failing
-path, though your situation may vary depending on the detail of error handling
-you perform.
+the example shows.) You'll also want to write some high-level integration tests
+to make sure that the command is implemented correctly inside your controller,
+and has the expected system-wide results. You shouldn't need to write
+integration specs to test every path -- it should suffice to test a successful
+path and a failing path, though your situation may vary depending on the detail
+of error handling you perform.
 
 Here's one huge benefit: with a few small steps, you won't need to include
 `rails_helper` to boot up the entire environment. That means blazingly fast
@@ -359,7 +392,8 @@ undefined method `call' for nil:NilClass
 This means that the command failed and you didn't specify an `on_failure`
 callback. You can stick a debugger inside of `run_failure_callbacks`, and get
 the failure exception as `self.error`. You can also reraise the exception to
-achieve a better result summary, but this was not done by default.
+achieve a better result summary, but this is not done by default, as you may
+also want to test error handling.
 
 **Now**, in version 3.0 and later, any command that does not receive a callable
 `on_failure` argument will raise any arguments it encounters during the process
@@ -456,6 +490,7 @@ For example, see `Skywalker::Command` documentation above.
 
 1. Fork it ( https://github.com/robyurkowski/skywalker/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+3. Ensure both sets of tests are green (`bundle exec rake`)
+4. Commit your changes (`git commit -am 'Add some feature'`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create a new Pull Request
