@@ -4,8 +4,6 @@ Skywalker is a gem that provides a simple command pattern for applications that
 use transactions. (Or not! In later versions, Skywalker is much more modular and
 can be [used for non-transactional purposes](#components), too.)
 
-use transactions.
-
 ## Why Skywalker?
 
 It's a reference to 'Commander Skywalker' from Star Wars, a rank the
